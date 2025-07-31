@@ -3,46 +3,92 @@
 {% block title %}కొత్త పోస్ట్ సృష్టించండి (Create Post){% endblock %}
 
 {% block content %}
+<style>
+    .input-style {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #D1D5DB;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .input-style:focus {
+        border-color: #F97316;
+        box-shadow: 0 0 0 2px #FDBA74;
+        outline: none;
+    }
+    .file-upload-box {
+        border: 2px dashed #D1D5DB;
+        border-radius: 8px;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.3s, background-color 0.3s;
+    }
+    .file-upload-box:hover {
+        border-color: #F97316;
+        background-color: #FFF7ED;
+    }
+</style>
+
 <div class="bg-white p-8 rounded-2xl shadow-lg max-w-4xl mx-auto">
     <h2 class="text-3xl font-bold text-primary mb-2 telugu">మీ సంస్కృతిని పంచుకోండి</h2>
-    <p class="text-gray-600 mb-6">Share Your Culture</p>
+    <p class="text-gray-600 mb-8">Share Your Culture</p>
 
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
+        <!-- Manually rendered form for better alignment and styling -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>{{ form.state.label_tag }} {{ form.state }}</div>
-            <div>{{ form.category.label_tag }} {{ form.category }}</div>
+            <div>
+                <label for="{{ form.state.id_for_label }}" class="font-semibold block mb-1">{{ form.state.label }}</label>
+                <!-- Correctly render the state dropdown with the class -->
+                <select name="{{ form.state.name }}" id="{{ form.state.id_for_label }}" class="input-style">
+                    {% for value, text in form.state.field.choices %}
+                        <option value="{{ value }}">{{ text }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="{{ form.category.id_for_label }}" class="font-semibold block mb-1">{{ form.category.label }}</label>
+                <!-- Correctly render the category dropdown with the class -->
+                <select name="{{ form.category.name }}" id="{{ form.category.id_for_label }}" class="input-style">
+                    {% for value, text in form.category.field.choices %}
+                        <option value="{{ value }}">{{ text }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
         <div class="mt-6">
-            <label for="{{ form.text_content.id_for_label }}">{{ form.text_content.label }}</label>
-            {{ form.text_content }}
-            <span id="language-warning" class="text-red-500 text-sm mt-1 hidden">దయచేసి తెలుగులో మాత్రమే వ్రాయండి.</span>
-            {% for error in form.text_content.errors %}<p class="text-red-500 text-sm mt-1">{{ error }}</p>{% endfor %}
+            <div class="flex justify-between items-center mb-1">
+                <label for="{{ form.text_content.id_for_label }}" class="font-semibold">{{ form.text_content.label }}</label>
+                <button type="button" id="emoji-btn" class="text-2xl p-1 rounded-full hover:bg-gray-200">😊</button>
+            </div>
+            <!-- Correctly render the textarea with the class -->
+            <textarea name="{{ form.text_content.name }}" id="{{ form.text_content.id_for_label }}" class="input-style" rows="4"></textarea>
+            <div class="relative">
+                <emoji-picker id="emoji-picker" class="light absolute z-10 hidden"></emoji-picker>
+            </div>
         </div>
 
         <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="border-2 border-dashed rounded-lg p-4 text-center">
-                <label for="id_image_content" class="cursor-pointer">
-                    <span class="text-2xl">🖼️</span><br>
-                    <span class="font-semibold text-secondary">Upload Image</span>
-                    <input type="file" name="image_content" id="id_image_content" class="hidden">
-                </label>
-            </div>
-            <div class="border-2 border-dashed rounded-lg p-4 text-center">
-                <label for="id_video_content" class="cursor-pointer">
-                    <span class="text-2xl">🎬</span><br>
-                    <span class="font-semibold text-secondary">Upload Video</span>
-                    <input type="file" name="video_content" id="id_video_content" class="hidden">
-                </label>
-            </div>
-            <div class="border-2 border-dashed rounded-lg p-4 text-center">
-                 <label for="id_audio_content" class="cursor-pointer">
-                    <span class="text-2xl">🎵</span><br>
-                    <span class="font-semibold text-secondary">Upload Audio</span>
-                    <input type="file" name="audio_content" id="id_audio_content" class="hidden">
-                </label>
-            </div>
+            <label for="id_image_content" class="file-upload-box">
+                <span class="text-4xl">🖼️</span><br>
+                <span class="font-semibold text-secondary mt-2 block">Upload Image</span>
+                <span id="image-file-name" class="text-sm text-gray-500 mt-1 block">No file chosen</span>
+                <input type="file" name="image_content" id="id_image_content" class="hidden">
+            </label>
+            <label for="id_video_content" class="file-upload-box">
+                <span class="text-4xl">🎬</span><br>
+                <span class="font-semibold text-secondary mt-2 block">Upload Video</span>
+                <span id="video-file-name" class="text-sm text-gray-500 mt-1 block">No file chosen</span>
+                <input type="file" name="video_content" id="id_video_content" class="hidden">
+            </label>
+            <label for="id_audio_content" class="file-upload-box">
+                <span class="text-4xl">🎵</span><br>
+                <span class="font-semibold text-secondary mt-2 block">Upload Audio</span>
+                <span id="audio-file-name" class="text-sm text-gray-500 mt-1 block">No file chosen</span>
+                <input type="file" name="audio_content" id="id_audio_content" class="hidden">
+            </label>
         </div>
         
         <div class="mt-8 text-center">
@@ -53,17 +99,46 @@
     </form>
 </div>
 
-<script>
-    const textInput = document.getElementById('id_text_content');
-    const warningSpan = document.getElementById('language-warning');
-    const teluguRegex = /^[\u0C00-\u0C7F\s\d.,!?-]*$/;
+<script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 
-    textInput.addEventListener('input', (e) => {
-        if (textInput.value && !teluguRegex.test(textInput.value)) {
-            warningSpan.classList.remove('hidden');
-        } else {
-            warningSpan.classList.add('hidden');
-        }
+<script>
+    // Emoji Picker Logic
+    const emojiPicker = document.getElementById('emoji-picker');
+    const emojiBtn = document.getElementById('emoji-btn');
+    const textArea = document.getElementById('id_text_content');
+
+    emojiBtn.addEventListener('click', () => {
+        emojiPicker.classList.toggle('hidden');
     });
+
+    emojiPicker.addEventListener('emoji-click', event => {
+        const emoji = event.detail.unicode;
+        const start = textArea.selectionStart;
+        const end = textArea.selectionEnd;
+        textArea.value = textArea.value.substring(0, start) + emoji + textArea.value.substring(end);
+        textArea.selectionStart = textArea.selectionEnd = start + emoji.length;
+        textArea.focus();
+        emojiPicker.classList.add('hidden');
+    });
+
+    // File Name Display Logic
+    function setupFileInput(inputId, displayId) {
+        const fileInput = document.getElementById(inputId);
+        const fileNameDisplay = document.getElementById(displayId);
+        if (fileInput) {
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length > 0) {
+                    fileNameDisplay.textContent = fileInput.files[0].name;
+                } else {
+                    fileNameDisplay.textContent = 'No file chosen';
+                }
+            });
+        }
+    }
+
+    setupFileInput('id_image_content', 'image-file-name');
+    setupFileInput('id_video_content', 'video-file-name');
+    setupFileInput('id_audio_content', 'audio-file-name');
 </script>
+
 {% endblock %}

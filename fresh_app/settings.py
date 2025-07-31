@@ -130,3 +130,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 LOGIN_REDIRECT_URL = 'profile'
+
+# fresh_app/settings.py
+
+# ... at the end of the file ...
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

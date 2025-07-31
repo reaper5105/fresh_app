@@ -11,10 +11,16 @@
     <p class="text-gray-600 mt-2">Welcome to your personal dashboard.</p>
     <p class="text-gray-800 mt-1"><strong>Email:</strong> {{ user.email }}</p>
     
-    <!-- This link now points to the new 'create_post' page -->
-    <a href="{% url 'create_post' %}" class="mt-6 inline-block btn-primary">
-        <span class="telugu">+ కొత్త పోస్ట్ జోడించండి</span> (Add New Post)
-    </a>
+    <div class="mt-6 flex justify-center items-center space-x-4">
+        <!-- Link to create a new post -->
+        <a href="{% url 'create_post' %}" class="btn-primary">
+            <span class="telugu">+ కొత్త పోస్ట్ జోడించండి</span> (Add New Post)
+        </a>
+        <!-- NEW: Link to edit the profile and follow categories -->
+        <a href="{% url 'edit_profile' %}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">
+            Edit Profile
+        </a>
+    </div>
 </div>
 
 <!-- User's Contributions -->

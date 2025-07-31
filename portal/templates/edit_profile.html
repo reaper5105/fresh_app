@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Your Profile{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8 mt-10">
+    <h2 class="text-3xl font-bold text-center text-primary">
+        <span class="telugu">మీ ప్రొఫైల్‌ను సవరించండి</span> (Edit Profile)
+    </h2>
+    <p class="text-center text-gray-600 mb-6">Select your favorite categories to personalize your feed.</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="space-y-6">
+            <div>
+                <label class="font-semibold">{{ form.followed_categories.label }}</label>
+                <div class="mt-2 grid grid-cols-2 gap-4">
+                    {% for choice in form.followed_categories %}
+                        <label class="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 border hover:bg-gray-100 cursor-pointer">
+                            {{ choice.tag }}
+                            <span>{{ choice.choice_label }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <button type="submit" class="btn-primary w-full">
+                <span class="telugu">సేవ్ చేయండి</span> (Save Changes)
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

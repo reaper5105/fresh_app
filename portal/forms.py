@@ -2,22 +2,15 @@
 import re
 from django import forms
 from django.core.exceptions import ValidationError
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
-from .models import Contribution
+from .models import Contribution, UserProfile
 
-def validate_telugu(value):
-    telugu_pattern = re.compile(r'^[\u0C00-\u0C7F\s\d.,!?-]+$')
-    if not telugu_pattern.match(value):
-        raise ValidationError(
-            'దయచేసి తెలుగులో మాత్రమే వ్రాయండి. (Please write in Telugu only.)',
-            code='invalid_language'
-        )
-
+# The form for submitting cultural content
 class ContributionForm(forms.ModelForm):
+    # The custom validator has been removed from this field
     text_content = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 4}),
-        validators=[validate_telugu],
         required=True,
         label='వివరణ (Description)'
     )
@@ -33,12 +26,14 @@ class ContributionForm(forms.ModelForm):
             'video_content': 'వీడియో (Video)',
         }
 
+# --- (The rest of the file remains the same) ---
+
+# Custom Registration Form
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(
         required=True, 
         help_text='అవసరం. దయచేసి సరైన ఇమెయిల్ చిరునామాను ఇవ్వండి.'
     )
-
     class Meta(UserCreationForm.Meta):
         model = User
         fields = UserCreationForm.Meta.fields + ('email',)
@@ -49,3 +44,29 @@ class CustomUserCreationForm(UserCreationForm):
         self.fields['email'].widget.attrs.update({'class': 'input-style', 'placeholder': 'మీరు@ఉదాహరణ.com'})
         self.fields['password1'].widget.attrs.update({'class': 'input-style', 'placeholder': 'ఒక బలమైన పాస్‌వర్డ్‌ను నమోదు చేయండి'})
         self.fields['password2'].widget.attrs.update({'class': 'input-style', 'placeholder': 'మీ పాస్‌వర్డ్‌ను నిర్ధారించండి'})
+
+# Form for Editing User Profile
+class ProfileEditForm(forms.ModelForm):
+    CATEGORY_CHOICES = Contribution.CATEGORY_CHOICES
+    
+    followed_categories = forms.MultipleChoiceField(
+        choices=CATEGORY_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="Your Favorite Categories"
+    )
+
+    class Meta:
+        model = UserProfile
+        fields = ['followed_categories']
+
+    def save(self, commit=True):
+        profile = super().save(commit=False)
+        profile.followed_categories = ",".join(self.cleaned_data.get('followed_categories', []))
+        if commit:
+            profile.save()
+        return profile
+
+# Custom Login Form with "Remember Me"
+class CustomAuthenticationForm(AuthenticationForm):
+    remember_me = forms.BooleanField(required=False, initial=False, widget=forms.CheckboxInput(attrs={'class': 'h-4 w-4 rounded border-gray-300 text-secondary focus:ring-secondary'}))

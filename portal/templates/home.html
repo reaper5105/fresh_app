@@ -1,10 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<!-- (The submission form remains the same) -->
-<!-- ... your existing form code ... -->
 
-<h2 class="text-3xl font-bold text-primary mb-6 telugu">ఇటీవలి పోస్ట్‌లు (Recent Posts)</h2>
+{% if is_personal_feed %}
+    <div class="text-center bg-white p-4 rounded-lg shadow-md mb-8">
+        <p>You're viewing your personalized feed. To see more, <a href="{% url 'explore' %}" class="text-secondary font-bold">explore all posts</a> and follow users or <a href="{% url 'edit_profile' %}" class="text-secondary font-bold">select your favorite categories</a>.</p>
+    </div>
+{% else %}
+    <h2 class="text-3xl font-bold text-primary mb-6 telugu">ఇటీవలి పోస్ట్‌లు (Recent Posts)</h2>
+{% endif %}
+
 <div class="space-y-8">
     {% for item in contributions %}
     <div class="bg-white p-6 rounded-2xl shadow-lg">
@@ -14,12 +19,12 @@
                 <p class="text-xl font-bold">
                     <span class="text-secondary">{{ item.get_category_display }}</span> from <span class="text-primary">{{ item.state.name }}</span>
                 </p>
-                <p class="text-sm text-gray-500">by {{ item.author.username }} on {{ item.submitted_at|date:"F j, Y" }}</p>
+                <p class="text-sm text-gray-500">by <a href="{% url 'public_profile' item.author.username %}" class="font-bold text-primary hover:underline">{{ item.author.username }}</a> on {{ item.submitted_at|date:"F j, Y" }}</p>
             </div>
             <!-- Follow Button -->
-            {% if item.author != user %}
+            {% if user.is_authenticated and item.author != user %}
             <a href="{% url 'follow_user' item.author.id %}" class="btn-primary text-sm">
-                {% if item.author in user.userprofile.follows.all %}
+                {% if item.author.userprofile in user.userprofile.follows.all %}
                     Unfollow
                 {% else %}
                     Follow
@@ -49,7 +54,7 @@
             <h4 class="font-bold mb-2">Comments</h4>
             <div class="space-y-2 mb-4">
                 {% for comment in item.comments.all %}
-                    <p><strong>{{ comment.author.username }}:</strong> {{ comment.text }}</p>
+                    <p><strong><a href="{% url 'public_profile' comment.author.username %}" class="text-primary hover:underline">{{ comment.author.username }}</a>:</strong> {{ comment.text }}</p>
                 {% empty %}
                     <p class="text-gray-500">No comments yet.</p>
                 {% endfor %}
@@ -61,6 +66,8 @@
             </form>
         </div>
     </div>
+    {% empty %}
+        <p class="text-center text-gray-600 py-10">Your feed is empty! Start by following some users or categories to see their posts here.</p>
     {% endfor %}
 </div>
 
@@ -90,9 +97,13 @@ function likePost(contributionId) {
         },
     })
     .then(response => {
+        // --- THIS IS THE FIX ---
+        // First, check if the server responded successfully.
         if (!response.ok) {
+            // If not, throw an error to be caught by the .catch() block.
             throw new Error('Network response was not ok');
         }
+        // If the response is ok, then we can safely try to parse it as JSON.
         return response.json();
     })
     .then(data => {
@@ -100,6 +111,7 @@ function likePost(contributionId) {
         if (likesCountElem) {
             likesCountElem.innerText = data.likes_count + ' likes';
         }
+        
         const likeButton = document.querySelector(`.like-btn-${contributionId}`);
         if (likeButton) {
             if (data.liked) {
@@ -110,8 +122,9 @@ function likePost(contributionId) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        // Optionally show an error message to the user
+        // This will now catch any network errors or server errors.
+        console.error('Error liking post:', error);
+        // You could also show a user-friendly error message here.
     });
 }
 </script>

@@ -3,6 +3,48 @@
 {% block title %}లాగిన్ (Login){% endblock %}
 
 {% block content %}
+<style>
+    .password-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    .password-wrapper .input-style {
+        padding-right: 40px; /* Make space for the icon */
+    }
+    .password-toggle {
+        position: absolute;
+        right: 10px;
+        cursor: pointer;
+        color: #6B7280; /* Gray-500 */
+    }
+    .input-style {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #D1D5DB;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .input-style:focus {
+        border-color: #F97316;
+        box-shadow: 0 0 0 2px #FDBA74;
+        outline: none;
+    }
+    /* --- NEW Styles for Validation --- */
+    .input-valid {
+        border-color: #22C55E; /* Green-500 */
+    }
+    .input-invalid {
+        border-color: #EF4444; /* Red-500 */
+    }
+    .input-valid:focus {
+        box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.4);
+    }
+    .input-invalid:focus {
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.4);
+    }
+</style>
+
 <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl mt-10">
     <div class="p-8">
         <h2 class="text-3xl font-bold text-center text-primary">
@@ -14,18 +56,109 @@
             <p class="text-red-500 text-center mb-4">Your username and password didn't match. Please try again.</p>
         {% endif %}
 
-        <form method="post">
+        <form id="login-form" method="post">
             {% csrf_token %}
             <div class="space-y-4">
-                {{ form.as_p }}
+                <!-- Username field with validation -->
+                <div>
+                    <label for="id_username" class="font-semibold block mb-1">Username:</label>
+                    <input type="text" name="{{ form.username.name }}" id="id_username" class="input-style" required>
+                </div>
+
+                <!-- Password field with validation and toggle -->
+                <div>
+                    <label for="id_password" class="font-semibold block mb-1">Password:</label>
+                    <div class="password-wrapper">
+                        <input type="password" name="{{ form.password.name }}" id="id_password" class="input-style" required>
+                        <span class="password-toggle" onclick="togglePasswordVisibility()">
+                            <svg id="eye-open" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.816 1.097-2.084 2.22-3.655 2.943C9.879 11.832 8.12 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.133 13.133 0 0 1 1.172 8z"/>
+                                <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                            </svg>
+                            <svg id="eye-closed" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-eye-slash hidden" viewBox="0 0 16 16">
+                                <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A5.94 5.94 0 0 1 8 5.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486l.708.709z"/>
+                                <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829l.822.822zm-2.943 1.288.822.822.083.083c.174.173.358.332.55.48.192.147.394.28.608.403l.708.709a.997.997 0 0 1-1.414 1.414l-.707-.707-.083-.083a5.942 5.942 0 0 1-1.546-.88c-.335-.24-.66-.52-1.012-.835l-.707-.707.822-.822z"/>
+                                <path d="M8.061 3.5C5.928 3.5 4.12 4.668 2.832 5.957c-.816 1.097-2.084 2.22-3.655 2.943a.997.997 0 0 1-1.414-1.414L11.414 1.05a.997.997 0 0 1 1.414 1.414L8.061 3.5z"/>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+                <!-- Remember Me Checkbox -->
+                <div class="flex items-center">
+                    <input type="checkbox" name="{{ form.remember_me.name }}" id="{{ form.remember_me.id_for_label }}" class="h-4 w-4 rounded border-gray-300 text-secondary focus:ring-secondary">
+                    <label for="{{ form.remember_me.id_for_label }}" class="ml-2 block text-sm text-gray-900">Remember Me</label>
+                </div>
             </div>
             <div class="mt-8 text-center">
-                <button type="submit" class="btn-primary w-full">
-                    <span class="telugu">లాగిన్</span> (Login)
+                <button id="login-button" type="submit" class="btn-primary w-full flex items-center justify-center">
+                    <span id="button-text" class="telugu">లాగిన్ (Login)</span>
+                    <span id="spinner" class="hidden">
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </span>
                 </button>
             </div>
         </form>
-        <p class="mt-4 text-center">Don't have an account? <a href="{% url 'register' %}" class="text-secondary font-semibold">Register here</a>.</p>
+        
+        <p class="mt-4 text-center">
+            <a href="{% url 'password_reset' %}" class="text-sm text-gray-600 hover:text-secondary">Forgot Password?</a>
+        </p>
+
+        <p class="mt-2 text-center">Don't have an account? <a href="{% url 'register' %}" class="text-secondary font-semibold">Register here</a>.</p>
     </div>
 </div>
+
+<script>
+    const usernameInput = document.getElementById('id_username');
+    const passwordInput = document.getElementById('id_password');
+    const loginForm = document.getElementById('login-form');
+    const loginButton = document.getElementById('login-button');
+    const buttonText = document.getElementById('button-text');
+    const spinner = document.getElementById('spinner');
+
+    function validateInput(input) {
+        if (input.value.trim() !== '') {
+            input.classList.add('input-valid');
+            input.classList.remove('input-invalid');
+            return true;
+        } else {
+            input.classList.add('input-invalid');
+            input.classList.remove('input-valid');
+            return false;
+        }
+    }
+
+    usernameInput.addEventListener('input', () => validateInput(usernameInput));
+    passwordInput.addEventListener('input', () => validateInput(passwordInput));
+
+    loginForm.addEventListener('submit', (e) => {
+        const isUsernameValid = validateInput(usernameInput);
+        const isPasswordValid = validateInput(passwordInput);
+
+        if (isUsernameValid && isPasswordValid) {
+            buttonText.classList.add('hidden');
+            spinner.classList.remove('hidden');
+            loginButton.disabled = true;
+        } else {
+            e.preventDefault(); // Stop form submission if validation fails
+        }
+    });
+
+    function togglePasswordVisibility() {
+        const eyeOpen = document.getElementById('eye-open');
+        const eyeClosed = document.getElementById('eye-closed');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeOpen.classList.add('hidden');
+            eyeClosed.classList.remove('hidden');
+        } else {
+            passwordInput.type = 'password';
+            eyeOpen.classList.remove('hidden');
+            eyeClosed.classList.add('hidden');
+        }
+    }
+</script>
 {% endblock %}

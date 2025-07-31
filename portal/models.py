@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+# ... (State, Contribution, Comment, UserProfile models remain the same) ...
 class State(models.Model):
     name = models.CharField(max_length=100, unique=True)
     def __str__(self):
@@ -49,15 +50,29 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user.username
 
-# --- CORRECTED SIGNAL HANDLER ---
-# This single function now handles both creating and updating the UserProfile.
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
-    """
-    Creates a UserProfile when a new User is created, or just saves
-    the profile if an existing User is saved.
-    """
     if created:
         UserProfile.objects.create(user=instance)
-    # Ensure the profile is saved every time the user is saved.
     instance.userprofile.save()
+
+
+# --- NEW Notification Model ---
+class Notification(models.Model):
+    # The user who should receive the notification
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    # The user who triggered the notification (can be null for system messages)
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='+')
+    # The type of notification
+    verb = models.CharField(max_length=255)
+    # A link to the relevant object (e.g., the post that was liked)
+    target = models.ForeignKey(Contribution, on_delete=models.CASCADE, null=True, blank=True)
+    # Read/unread status
+    is_read = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.sender} -> {self.recipient}: {self.verb}'
+
+    class Meta:
+        ordering = ['-timestamp']
