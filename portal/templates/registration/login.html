@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}లాగిన్ (Login){% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl mt-10">
+    <div class="p-8">
+        <h2 class="text-3xl font-bold text-center text-primary">
+            <span class="telugu">లాగిన్ అవ్వండి</span>
+        </h2>
+        <p class="text-center text-gray-600 mb-6 telugu">Login to Your Account</p>
+
+        {% if form.errors %}
+            <p class="text-red-500 text-center mb-4">Your username and password didn't match. Please try again.</p>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="space-y-4">
+                {{ form.as_p }}
+            </div>
+            <div class="mt-8 text-center">
+                <button type="submit" class="btn-primary w-full">
+                    <span class="telugu">లాగిన్</span> (Login)
+                </button>
+            </div>
+        </form>
+        <p class="mt-4 text-center">Don't have an account? <a href="{% url 'register' %}" class="text-secondary font-semibold">Register here</a>.</p>
+    </div>
+</div>
+{% endblock %}

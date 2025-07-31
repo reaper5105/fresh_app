@@ -1,0 +1,53 @@
+{% extends "admin/base_site.html" %}
+{% block title %}Dashboard | Culture Portal Admin{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1 class="text-2xl font-bold mb-6">Culture Portal Dashboard</h1>
+
+    <!-- Real-time Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold text-gray-700">Total Registered Users</h2>
+            <p class="text-4xl font-bold text-blue-600">{{ total_users }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold text-gray-700">Active Users (Logged In)</h2>
+            <p class="text-4xl font-bold text-green-600" id="active-users-count">{{ active_users }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold text-gray-700">Total Contributions</h2>
+            <p class="text-4xl font-bold text-purple-600">{{ total_contributions }}</p>
+        </div>
+    </div>
+
+    <!-- Browse Content by State -->
+    <h2 class="text-xl font-bold mb-4">Browse All Contributions by State</h2>
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        {% for state, contributions in contributions_by_state.items %}
+            <details class="mb-4">
+                <summary class="font-bold text-lg cursor-pointer text-indigo-700">{{ state.name }} ({{ contributions|length }} posts)</summary>
+                <div class="mt-4 pl-4 border-l-2 border-indigo-200">
+                    {% for item in contributions %}
+                        <div class="mb-6 p-4 border rounded-md">
+                            <p class="font-semibold">Posted by: {{ item.author.username }} on {{ item.submitted_at|date:"F j, Y" }}</p>
+                            <p class="text-sm text-gray-600">Category: {{ item.get_category_display }}</p>
+                            <p class="mt-2">{{ item.text_content|truncatewords:50 }}</p>
+                            <div class="flex flex-wrap gap-4 mt-2">
+                                {% if item.image_content %}<a href="{{ item.image_content.url }}" target="_blank" class="text-blue-500 hover:underline">View Image</a>{% endif %}
+                                {% if item.video_content %}<a href="{{ item.video_content.url }}" target="_blank" class="text-blue-500 hover:underline">View Video</a>{% endif %}
+                                {% if item.audio_content %}<a href="{{ item.audio_content.url }}" target="_blank" class="text-blue-500 hover:underline">View Audio</a>{% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </details>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // This script can be expanded later to use WebSockets for live updates.
+    // For now, it just displays the initial data.
+</script>
+{% endblock %}

@@ -1,0 +1,63 @@
+# portal/models.py
+from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+class State(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    def __str__(self):
+        return self.name
+
+class Contribution(models.Model):
+    CATEGORY_CHOICES = [
+        ('PLACES', 'Places'),
+        ('DANCE', 'Dance'),
+        ('FOOD', 'Food'),
+        ('TRADITION', 'Tradition'),
+    ]
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    state = models.ForeignKey(State, on_delete=models.CASCADE)
+    category = models.CharField(max_length=10, choices=CATEGORY_CHOICES)
+    text_content = models.TextField(blank=True, null=True)
+    image_content = models.ImageField(upload_to='images/', blank=True, null=True)
+    audio_content = models.FileField(upload_to='audio/', blank=True, null=True)
+    video_content = models.FileField(upload_to='videos/', blank=True, null=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    likes = models.ManyToManyField(User, related_name='liked_contributions', blank=True)
+
+    def __str__(self):
+        return f'{self.author.username} - {self.category} for {self.state.name}'
+
+    def total_likes(self):
+        return self.likes.count()
+
+class Comment(models.Model):
+    contribution = models.ForeignKey(Contribution, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Comment by {self.author.username} on {self.contribution}'
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    follows = models.ManyToManyField('self', related_name='followed_by', symmetrical=False, blank=True)
+    followed_categories = models.TextField(blank=True, help_text="Comma-separated list of categories")
+
+    def __str__(self):
+        return self.user.username
+
+# --- CORRECTED SIGNAL HANDLER ---
+# This single function now handles both creating and updating the UserProfile.
+@receiver(post_save, sender=User)
+def create_or_update_user_profile(sender, instance, created, **kwargs):
+    """
+    Creates a UserProfile when a new User is created, or just saves
+    the profile if an existing User is saved.
+    """
+    if created:
+        UserProfile.objects.create(user=instance)
+    # Ensure the profile is saved every time the user is saved.
+    instance.userprofile.save()

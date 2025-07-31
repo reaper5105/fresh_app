@@ -1,0 +1,17 @@
+    {% extends 'base.html' %}
+
+{% block title %}విజయవంతంగా లాగ్ అవుట్ అయ్యారు (Logged Out){% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl mt-10 text-center">
+    <div class="p-8">
+        <h2 class="text-3xl font-bold text-primary">
+            <span class="telugu">మీరు లాగ్ అవుట్ అయ్యారు</span>
+        </h2>
+        <p class="text-gray-600 my-4">You have been successfully logged out.</p>
+        <a href="{% url 'login' %}" class="btn-primary">
+            <span class="telugu">మళ్లీ లాగిన్ అవ్వండి</span> (Login Again)
+        </a>
+    </div>
+</div>
+{% endblock %}

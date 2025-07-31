@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}భారతీయ సంస్కృతి (Indian Culture){% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Poppins', 'Noto Sans Telugu', sans-serif;
+            background-color: #FEF3C7; /* Fallback color */
+            
+            /* --- New India Map Background --- */
+            /* This is a subtle, theme-matching SVG of the map of India */
+            background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23EADCB3' fill-opacity='0.4'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c-5.523 0-10-4.477-10-10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            background-attachment: fixed; /* Keeps the background in place while scrolling */
+        }
+        .telugu {
+            font-family: 'Noto Sans Telugu', sans-serif;
+        }
+        .bg-primary { background-color: #0D9488; } /* Teal */
+        .bg-secondary { background-color: #F97316; } /* Saffron/Orange */
+        .text-primary { color: #0D9488; }
+        .text-secondary { color: #F97316; }
+        .btn-primary {
+            background-color: #F97316;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            background-color: #EA580C;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <header class="bg-primary text-white shadow-lg">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="{% url 'home' %}" class="text-2xl font-bold">
+                <span class="telugu">భారతీయ సంస్కృతి</span> | Indian Culture
+            </a>
+            <div>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'profile' %}" class="mr-4 font-semibold hover:text-gray-300">My Profile</a>
+                    <span class="mr-4">Welcome, <strong>{{ user.username }}</strong></span>
+                    
+                    <!-- Correct Logout Form -->
+                    <form action="{% url 'logout' %}" method="post" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-secondary hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg">
+                            <span class="telugu">లాగ్ అవుట్</span> (Logout)
+                        </button>
+                    </form>
+
+                {% else %}
+                    <a href="{% url 'login' %}" class="mr-4 hover:text-gray-300">Login</a>
+                    <a href="{% url 'register' %}" class="bg-secondary hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg">Register</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</body>
+</html>

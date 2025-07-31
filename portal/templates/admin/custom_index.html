@@ -1,0 +1,67 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
+
+{% block title %}Dashboard | Culture Portal Admin{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1 class="text-2xl font-bold mb-6 text-gray-800">Culture Portal Dashboard</h1>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold text-gray-700">Total Registered Users</h2>
+            <p class="text-4xl font-bold text-blue-600">{{ total_users }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold text-gray-700">Active Users (Logged In)</h2>
+            <p class="text-4xl font-bold text-green-600">{{ active_users }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold text-gray-700">Total Contributions</h2>
+            <p class="text-4xl font-bold text-purple-600">{{ total_contributions }}</p>
+        </div>
+    </div>
+
+    <!-- Quick Links to Admin Sections -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+        <h2 class="text-xl font-bold mb-4 text-gray-800">Admin Management</h2>
+        <div class="flex space-x-4">
+            <a href="{% url 'admin:auth_user_changelist' %}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Manage Users</a>
+            <a href="{% url 'admin:portal_contribution_changelist' %}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Manage Contributions</a>
+            <a href="{% url 'admin:portal_state_changelist' %}" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded">Manage States</a>
+        </div>
+    </div>
+
+    <!-- Browse Content by State -->
+    <h2 class="text-xl font-bold mb-4 text-gray-800">Browse All Contributions by State</h2>
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        {% for state, contributions in contributions_by_state.items %}
+            <details class="mb-4 bg-gray-50 p-2 rounded">
+                <summary class="font-bold text-lg cursor-pointer text-indigo-700">{{ state.name }} ({{ contributions|length }} posts)</summary>
+                <div class="mt-4 pl-4 border-l-2 border-indigo-200">
+                    {% for item in contributions %}
+                        <div class="mb-6 p-4 border rounded-md bg-white">
+                            <p class="font-semibold">Posted by: {{ item.author.username }} on {{ item.submitted_at|date:"F j, Y" }}</p>
+                            <p class="text-sm text-gray-600">Category: {{ item.get_category_display }}</p>
+                            <p class="mt-2">{{ item.text_content|truncatewords:50 }}</p>
+                            <div class="flex flex-wrap gap-4 mt-2">
+                                {% if item.image_content %}<a href="{{ item.image_content.url }}" target="_blank" class="text-blue-500 hover:underline">View Image</a>{% endif %}
+                                {% if item.video_content %}<a href="{{ item.video_content.url }}" target="_blank" class="text-blue-500 hover:underline">View Video</a>{% endif %}
+                                {% if item.audio_content %}<a href="{{ item.audio_content.url }}" target="_blank" class="text-blue-500 hover:underline">View Audio</a>{% endif %}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-gray-500">No contributions for this state yet.</p>
+                    {% endfor %}
+                </div>
+            </details>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

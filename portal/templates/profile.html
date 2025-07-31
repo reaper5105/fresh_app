@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ user.username }} యొక్క ప్రొఫైల్ (Profile){% endblock %}
+
+{% block content %}
+<!-- Profile Header -->
+<div class="bg-white p-8 rounded-2xl shadow-lg mb-10 text-center">
+    <h2 class="text-4xl font-bold text-primary">
+        <span class="telugu">{{ user.username }} యొక్క ప్రొఫైల్</span>
+    </h2>
+    <p class="text-gray-600 mt-2">Welcome to your personal dashboard.</p>
+    <p class="text-gray-800 mt-1"><strong>Email:</strong> {{ user.email }}</p>
+    
+    <!-- This link now points to the new 'create_post' page -->
+    <a href="{% url 'create_post' %}" class="mt-6 inline-block btn-primary">
+        <span class="telugu">+ కొత్త పోస్ట్ జోడించండి</span> (Add New Post)
+    </a>
+</div>
+
+<!-- User's Contributions -->
+<h3 class="text-3xl font-bold text-primary mb-6 telugu">మీ పోస్ట్‌లు (Your Posts)</h3>
+<div class="space-y-8">
+    {% for item in user_contributions %}
+    <div class="bg-white p-6 rounded-2xl shadow-lg">
+        <p class="text-xl font-bold">
+            <span class="text-secondary">{{ item.get_category_display }}</span> from <span class="text-primary">{{ item.state.name }}</span>
+        </p>
+        <p class="text-sm text-gray-500 mb-4">Posted on {{ item.submitted_at|date:"F j, Y" }}</p>
+        
+        {% if item.text_content %}<p class="mb-4">{{ item.text_content }}</p>{% endif %}
+        
+        <div class="flex flex-wrap gap-4">
+            {% if item.image_content %}<img src="{{ item.image_content.url }}" class="max-w-sm rounded-lg">{% endif %}
+            {% if item.video_content %}<video controls src="{{ item.video_content.url }}" class="max-w-sm rounded-lg"></video>{% endif %}
+            {% if item.audio_content %}<audio controls src="{{ item.audio_content.url }}"></audio>{% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-center text-gray-600 py-8">You have not made any contributions yet. Click the button above to add your first post!</p>
+    {% endfor %}
+</div>
+{% endblock %}

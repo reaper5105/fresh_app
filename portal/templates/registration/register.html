@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}నమోదు చేసుకోండి (Register){% endblock %}
+
+{% block content %}
+<style>
+    .input-style {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #D1D5DB;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .input-style:focus {
+        border-color: #F97316;
+        box-shadow: 0 0 0 2px #FDBA74;
+        outline: none;
+    }
+    .errorlist {
+        list-style-type: none;
+        padding: 0;
+        color: #EF4444;
+        font-size: 0.875rem;
+    }
+    .helptext {
+        font-size: 0.8rem;
+        color: #6B7280;
+        margin-top: 4px;
+    }
+    #password-strength-bar {
+        height: 8px;
+        width: 0%;
+        border-radius: 4px;
+        transition: width 0.3s, background-color 0.3s;
+    }
+</style>
+
+<div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-10">
+    <div class="p-8">
+        <h2 class="text-3xl font-bold text-center text-primary">
+            <span class="telugu">ఖాతాను సృష్టించండి</span> (Create Account)
+        </h2>
+        <p class="text-center text-gray-600 mb-6 telugu">Join our community hassle-free!</p>
+        
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="space-y-6">
+                <!-- Username -->
+                <div>
+                    <label for="{{ form.username.id_for_label }}" class="font-semibold">Username</label>
+                    {{ form.username }}
+                    {% if form.username.help_text %}<div class="helptext">{{ form.username.help_text|safe }}</div>{% endif %}
+                    {% for error in form.username.errors %}<div class="errorlist">{{ error }}</div>{% endfor %}
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label for="{{ form.email.id_for_label }}" class="font-semibold">Email Address</label>
+                    {{ form.email }}
+                    {% if form.email.help_text %}<div class="helptext">{{ form.email.help_text|safe }}</div>{% endif %}
+                    {% for error in form.email.errors %}<div class="errorlist">{{ error }}</div>{% endfor %}
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label for="{{ form.password1.id_for_label }}" class="font-semibold">Password</label>
+                    {{ form.password1 }}
+                    <div class="w-full bg-gray-200 rounded-full mt-2">
+                        <div id="password-strength-bar"></div>
+                    </div>
+                    <div id="password-strength-text" class="text-sm mt-1"></div>
+                    {% if form.password1.help_text %}<div class="helptext">{{ form.password1.help_text|safe }}</div>{% endif %}
+                </div>
+
+                <!-- Password Confirmation -->
+                <div>
+                    <label for="{{ form.password2.id_for_label }}" class="font-semibold">Confirm Password</label>
+                    {{ form.password2 }}
+                    <div id="password-match-text" class="text-sm mt-1"></div>
+                    {% for error in form.password2.errors %}<div class="errorlist">{{ error }}</div>{% endfor %}
+                </div>
+            </div>
+
+            <div class="mt-8 text-center">
+                <button type="submit" class="btn-primary w-full">
+                    <span class="telugu">నమోదు చేసుకోండి</span> (Register)
+                </button>
+            </div>
+        </form>
+        <p class="mt-4 text-center">Already have an account? <a href="{% url 'login' %}" class="text-secondary font-semibold">Login here</a>.</p>
+    </div>
+</div>
+
+<script>
+    const pass1 = document.getElementById('id_password1');
+    const pass2 = document.getElementById('id_password2');
+    const strengthBar = document.getElementById('password-strength-bar');
+    const strengthText = document.getElementById('password-strength-text');
+    const matchText = document.getElementById('password-match-text');
+
+    pass1.addEventListener('input', () => {
+        const pass = pass1.value;
+        let score = 0;
+        if (pass.length > 8) score++;
+        if (pass.match(/[a-z]/)) score++;
+        if (pass.match(/[A-Z]/)) score++;
+        if (pass.match(/[0-9]/)) score++;
+        if (pass.match(/[^a-zA-Z0-9]/)) score++;
+
+        strengthBar.style.width = (score / 5) * 100 + '%';
+        switch (score) {
+            case 0:
+            case 1:
+                strengthBar.style.backgroundColor = '#EF4444'; // Red
+                strengthText.textContent = 'Very Weak';
+                break;
+            case 2:
+                strengthBar.style.backgroundColor = '#F97316'; // Orange
+                strengthText.textContent = 'Weak';
+                break;
+            case 3:
+                strengthBar.style.backgroundColor = '#FBBF24'; // Amber
+                strengthText.textContent = 'Good';
+                break;
+            case 4:
+                strengthBar.style.backgroundColor = '#A3E635'; // Lime
+                strengthText.textContent = 'Strong';
+                break;
+            case 5:
+                strengthBar.style.backgroundColor = '#22C55E'; // Green
+                strengthText.textContent = 'Very Strong';
+                break;
+        }
+    });
+
+    pass2.addEventListener('input', () => {
+        if (pass1.value === pass2.value) {
+            matchText.textContent = '✓ Passwords match';
+            matchText.style.color = '#22C55E'; // Green
+        } else {
+            matchText.textContent = '✗ Passwords do not match';
+            matchText.style.color = '#EF4444'; // Red
+        }
+    });
+</script>
+{% endblock %}
